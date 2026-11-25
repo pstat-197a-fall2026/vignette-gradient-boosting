@@ -69,13 +69,12 @@ colSums(is.na(cars_raw))
 sum(duplicated(cars_raw))
 
 
-# Remove duplicate rows and incorrect future year
+# Remove duplicates and implausible model years
 
 
 cars <- cars_raw %>%
   distinct() %>%
-  filter(year <= 2020)
-
+  filter(year >= 1990, year <= 2020)
 
 # Inspect potentially problematic observations
 
@@ -116,3 +115,20 @@ cat("Original observations:", nrow(cars_raw), "\n")
 cat("Cleaned observations:", nrow(cars), "\n")
 cat("Removed observations:",
     nrow(cars_raw) - nrow(cars), "\n")
+
+
+# Validate final dataset
+
+stopifnot(
+  nrow(cars) == 97709,
+  ncol(cars) == 10,
+  sum(duplicated(cars)) == 0,
+  sum(is.na(cars)) == 0,
+  all(cars$price > 0),
+  all(cars$mileage >= 0),
+  all(cars$year >= 1990),
+  all(cars$year <= 2020),
+  n_distinct(cars$make) == 9
+)
+
+cat("All data validation checks passed.\n")
