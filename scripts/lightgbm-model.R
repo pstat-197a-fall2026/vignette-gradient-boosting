@@ -86,3 +86,51 @@ write_csv(
   "data/processed/lightgbm-results.csv"
 )
 
+#validation predictions for visualization
+lgb_predictions <- tibble(
+  actual = y_validation,
+  predicted = validation_pred_lgb
+)
+
+set.seed(197)
+
+lgb_plot_data <- lgb_predictions |>
+  slice_sample(n = 5000)
+
+#actual vs. predicted
+p_lgb <- ggplot(
+  lgb_plot_data,
+  aes(x = actual, y = predicted)
+) +
+  geom_point(alpha = 0.2, color = "cyan4") +
+  geom_abline(
+    intercept = 0,
+    slope = 1,
+    color = "lightpink",
+    linetype = "dashed"
+  ) +
+  scale_x_continuous(
+    labels = scales::label_dollar(prefix = "£")
+  ) + 
+  scale_y_continuous(
+    labels = scales::label_dollar(prefix = "£")
+  ) + 
+  coord_equal() +
+  theme_minimal() +
+  labs(title = "LightGBM: Actual(x) vs. Predicted Prices(y)",
+       subtitle = "Validation Dataset",
+       x = "Actual Price",
+       y = "Predicted Price"
+  )
+
+print(p_lgb)
+
+#plot save for future reference
+ggsave(
+  "img/fig-lightgbm-predictions.png",
+  plot = p_lgb,
+  width = 8,
+  height = 6,
+  dpi = 600
+)
+
