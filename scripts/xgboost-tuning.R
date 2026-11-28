@@ -40,7 +40,7 @@ evaluation_sets <- list(
 #   subsample        - row subsampling ratio per tree
 #   colsample_bytree - feature subsampling ratio per tree
 tuning_grid <- expand_grid(
-  eta = c(0.05, 0.1),
+  eta = c(0.01, 0.05, 0.1, 0.3),
   max_depth = c(4, 6, 8),
   min_child_weight = c(1, 5),
   subsample = 0.8,
@@ -321,3 +321,11 @@ ggsave(
 )
 
 cat("Hyperparameter tuning complete. Figures and summary CSV saved.\n")
+
+
+print(tuned_results)
+
+write_csv(
+  tuned_results,
+  "data/processed/tuned-xgboost-results.csv"
+)

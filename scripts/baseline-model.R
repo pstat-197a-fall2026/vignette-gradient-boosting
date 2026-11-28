@@ -11,6 +11,8 @@ source("scripts/evaluation-metrics.R")
 X_train_lm <- cbind(Intercept = 1, X_train)
 X_validation_lm <- cbind(Intercept = 1, X_validation)
 
+X_test_lm <- cbind(Intercept = 1, X_test)
+
 # Fit multiple linear regression
 baseline_model <- lm.fit(
   x = X_train_lm,
@@ -39,6 +41,11 @@ validation_pred_lm <- as.vector(
   X_validation_lm %*% baseline_coefs
 )
 
+# Generate test predictions
+test_pred_lm <- as.vector(
+  X_test_lm %*% baseline_coefs
+)
+
 # Evaluate performance
 baseline_results <- bind_rows(
   
@@ -46,7 +53,10 @@ baseline_results <- bind_rows(
     mutate(Dataset = "Training"),
   
   evaluate_model(y_validation, validation_pred_lm) %>%
-    mutate(Dataset = "Validation")
+    mutate(Dataset = "Validation"),
+  
+  evaluate_model(y_test, test_pred_lm) %>%
+    mutate(Dataset = "Test")
   
 ) %>%
   mutate(Model = "Linear Regression") %>%
@@ -106,4 +116,12 @@ ggsave(
   width = 8,
   height = 6,
   dpi = 300
+)
+
+print(baseline_results)
+
+
+write_csv(
+  baseline_results,
+  "data/processed/baseline-results.csv"
 )

@@ -24,6 +24,8 @@ dvalidation <- xgb.DMatrix(
   missing = NA
 )
 
+dtest <- xgb.DMatrix(data = X_test, label = y_test, missing = NA)
+
 # Specify initial XGBoost parameters
 xgb_parameters <- list(
   objective = "reg:squarederror",
@@ -60,15 +62,21 @@ validation_pred_xgb <- predict(
   dvalidation
 )
 
+test_pred_xgb <- predict(
+  xgb_model,
+  dtest
+)
+
 # Calculate evaluation metrics
 xgb_results <- bind_rows(
-  
   evaluate_model(y_train, train_pred_xgb) %>%
     mutate(Dataset = "Training"),
   
   evaluate_model(y_validation, validation_pred_xgb) %>%
-    mutate(Dataset = "Validation")
+    mutate(Dataset = "Validation"),
   
+  evaluate_model(y_test, test_pred_xgb) %>%
+    mutate(Dataset = "Test")
 ) %>%
   mutate(Model = "XGBoost") %>%
   select(Model, Dataset, everything())
@@ -227,4 +235,11 @@ ggsave(
   width = 8,
   height = 6,
   dpi = 300
+)
+
+print(xgb_results)
+
+write_csv(
+  xgb_results,
+  "data/processed/xgboost-results.csv"
 )
